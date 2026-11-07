@@ -23,4 +23,6 @@ npm run lint
 
 The site listens on [http://localhost:3000](http://localhost:3000). Calls to action open `https://metatest.app/app/`.
 
+Public routes: `/`, `/about`, `/faq`, `/blog`, `/blog/[slug]`, `/contact`.
+
 Fonts and Lordicon load through `/hosted`, a same-origin proxy to `https://metatest.app`. Run `npm start` after `npm run build` so that route is available. The font files and animation JSON are not stored in this repository.

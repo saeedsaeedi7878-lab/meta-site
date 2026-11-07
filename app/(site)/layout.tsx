@@ -1,0 +1,5 @@
+import { PageShell } from "@/components/page-shell";
+
+export default function InnerLayout({ children }: { children: React.ReactNode }) {
+  return <PageShell>{children}</PageShell>;
+}

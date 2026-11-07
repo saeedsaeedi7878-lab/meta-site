@@ -1,0 +1,37 @@
+import { ArticleBrowser, type ArticleCard } from "@/components/article-browser";
+import { PageHero } from "@/components/page-hero";
+import { getArticles, getCategories, readingMinutes } from "@/lib/articles";
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata({
+  title: "بلاگ آموزشی",
+  description: "یادداشت‌های کوتاه درباره انتخاب مبحث، خواندن نمودار پیشرفت و پرسیدن سوال از معلم هوشمند متاتست.",
+  path: "/blog",
+});
+
+export default function BlogPage() {
+  const cards: ArticleCard[] = getArticles().map((article) => ({
+    slug: article.slug,
+    title: article.title,
+    description: article.description,
+    category: article.category,
+    publishedAt: article.publishedAt,
+    readingMinutes: readingMinutes(article),
+    featured: Boolean(article.featured),
+  }));
+
+  return (
+    <>
+      <PageHero
+        eyebrow="بلاگ آموزشی"
+        title="یادداشت‌هایی برای تمرین دقیق‌تر"
+        lede="این مطلب‌ها روش مطالعه را دور امکاناتی که متاتست معرفی کرده جمع می‌کنند. گزارش پژوهشی یا ادعای نتیجه‌گیری آماری نیستند."
+        crumbs={[
+          { name: "خانه", path: "/" },
+          { name: "بلاگ", path: "/blog" },
+        ]}
+      />
+      <ArticleBrowser articles={cards} categories={getCategories()} />
+    </>
+  );
+}

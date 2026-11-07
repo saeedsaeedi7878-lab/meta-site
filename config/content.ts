@@ -130,14 +130,29 @@ export const testimonialRows: Testimonial[][] = [
   ],
 ];
 
-/** Placeholder destinations from the reference. Real routes belong to later phases. */
-export const footerColumns = [
+export type FooterLink = {
+  label: string;
+  href?: string;
+};
+
+/** Links without href have no published destination yet. */
+export const footerColumns: { title: string; links: FooterLink[] }[] = [
   {
     title: "لینک‌های سریع",
-    links: ["درباره متاتست", "پلن‌ها و تعرفه‌ها", "سوالات متداول", "بلاگ آموزشی"],
+    links: [
+      { label: "درباره متاتست", href: "/about" },
+      { label: "پلن‌ها و تعرفه‌ها" },
+      { label: "سوالات متداول", href: "/faq" },
+      { label: "بلاگ آموزشی", href: "/blog" },
+    ],
   },
   {
     title: "دسترسی",
-    links: ["دانلود اپلیکیشن", "راهنمای شروع", "قوانین و حریم خصوصی", "پشتیبانی"],
+    links: [
+      { label: "دانلود اپلیکیشن" },
+      { label: "راهنمای شروع" },
+      { label: "قوانین و حریم خصوصی" },
+      { label: "پشتیبانی", href: "/contact" },
+    ],
   },
-] as const;
+];

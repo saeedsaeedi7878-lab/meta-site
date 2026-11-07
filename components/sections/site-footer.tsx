@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { assets } from "@/config/assets";
 import { footerColumns } from "@/config/content";
 import { site } from "@/config/site";
@@ -48,9 +49,13 @@ export function SiteFooter() {
           <div key={column.title}>
             <h3 className="footer-title">{column.title}</h3>
             <ul className="footer-links">
-              {column.links.map((label) => (
-                <li key={label}>
-                  <a href="#">{label}</a>
+              {column.links.map((link) => (
+                <li key={link.label}>
+                  {link.href ? (
+                    <Link href={link.href}>{link.label}</Link>
+                  ) : (
+                    <span className="footer-static">{link.label}</span>
+                  )}
                 </li>
               ))}
             </ul>
@@ -78,9 +83,9 @@ export function SiteFooter() {
 
           <div className="social-row">
             {socials.map(({ label, Icon }) => (
-              <a key={label} href="#" className="social-btn" aria-label={label}>
+              <span key={label} className="social-btn" role="img" aria-label={`${label}؛ نشانی منتشر نشده`}>
                 <Icon />
-              </a>
+              </span>
             ))}
           </div>
         </div>
