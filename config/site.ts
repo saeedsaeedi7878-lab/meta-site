@@ -29,3 +29,6 @@ export const site = {
     country: "IR",
   },
 } as const;
+
+/** Store or file URL. Replace null when a download destination is published. */
+export const downloadUrl: string | null = null;

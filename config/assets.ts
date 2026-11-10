@@ -31,3 +31,6 @@ export const assets = {
     cloudUser: `${hosted}/doodle-motif-709-cloud-user-in-reveal.json`,
   },
 } as const;
+
+/** Phone screen image. Null keeps the empty slot. Cover-fit, never stretched. */
+export const phoneScreen: string | null = null;

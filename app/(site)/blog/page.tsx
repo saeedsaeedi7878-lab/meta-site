@@ -1,4 +1,6 @@
+import { Suspense } from "react";
 import { ArticleBrowser, type ArticleCard } from "@/components/article-browser";
+import { ArticleSkeleton } from "@/components/article-skeleton";
 import { PageHero } from "@/components/page-hero";
 import { getArticles, getCategories, readingMinutes } from "@/lib/articles";
 import { pageMetadata } from "@/lib/seo";
@@ -18,6 +20,7 @@ export default function BlogPage() {
     publishedAt: article.publishedAt,
     readingMinutes: readingMinutes(article),
     featured: Boolean(article.featured),
+    tags: article.tags ?? [],
   }));
 
   return (
@@ -31,7 +34,9 @@ export default function BlogPage() {
           { name: "بلاگ", path: "/blog" },
         ]}
       />
-      <ArticleBrowser articles={cards} categories={getCategories()} />
+      <Suspense fallback={<ArticleSkeleton count={4} />}>
+        <ArticleBrowser articles={cards} categories={getCategories()} />
+      </Suspense>
     </>
   );
 }

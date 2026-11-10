@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { ArticleBody } from "@/components/article-body";
 import { ArticleCover } from "@/components/article-cover";
+import { ArticleSkeleton } from "@/components/article-skeleton";
+import { ReadingProgress } from "@/components/reading-progress";
 import { PageCta } from "@/components/page-cta";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { articles } from "@/config/articles";
@@ -49,7 +52,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd(article)) }} />
-      <article className="article-layout">
+      <ReadingProgress />
+      <article className="article-layout reader">
         <Breadcrumbs items={crumbs} />
         <p className="meta-row">
           <span>{article.category}</span>
@@ -63,7 +67,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         <p className="page-lede">{article.description}</p>
         <ArticleCover category={article.category} title={article.title} index={articles.findIndex((item) => item.slug === article.slug)} />
         <div className="article-grid">
-          <ArticleBody article={article} />
+          <Suspense fallback={<ArticleSkeleton variant="reader" />}>
+            <ArticleBody article={article} />
+          </Suspense>
           {headings.length > 1 ? (
             <nav className="toc" aria-label="فهرست مطلب">
               <p>در این مطلب</p>
@@ -85,7 +91,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           </h2>
           <div className="blog-grid">
             {related.map((item) => (
-              <article key={item.slug} className="blog-card glass-panel">
+                <article key={item.slug} className="editorial-card">
                 <p className="meta-row">
                   <span>{item.category}</span>
                 </p>

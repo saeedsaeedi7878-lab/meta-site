@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { assets } from "@/config/assets";
+import { assets, phoneScreen } from "@/config/assets";
 import { heroSlides, slideLabels } from "@/config/content";
 import { site } from "@/config/site";
 
@@ -165,16 +165,21 @@ export function Hero() {
 
         <div className="hero-phone-stage">
           <div className="phone-glow" />
-          <div className="phone-frame">
-            <div className="phone-notch" />
-            <div className="phone-screen">
-              <div className="phone-screen-placeholder">
-                <img src={assets.logo} className="mini-logo" alt="" width={56} height={56} />
-                <p>
-                  پیش‌نمایش اپلیکیشن
-                  <br />
-                  متاتست
-                </p>
+          <div className="phone-rig">
+            <div className="phone-frame">
+              <span className="phone-key phone-key-silent" />
+              <span className="phone-key phone-key-volume" />
+              <span className="phone-key phone-key-power" />
+              <div className="phone-screen">
+                <span className="phone-island" />
+                {phoneScreen ? (
+                  <img className="phone-shot" src={phoneScreen} alt="نمای صفحه برنامه متاتست" />
+                ) : (
+                  <div className="phone-screen-placeholder">
+                    <img src={assets.logo} className="mini-logo" alt="" width={48} height={48} />
+                    <p>جای تصویر صفحه برنامه</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

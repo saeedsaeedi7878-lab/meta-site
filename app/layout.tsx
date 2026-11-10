@@ -53,6 +53,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <link rel="stylesheet" href={assets.fontStylesheet} />
       </head>
       <body>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('motion')}catch(e){}",
+          }}
+        />
         <a className="skip-link" href="#content">
           رفتن به محتوا
         </a>

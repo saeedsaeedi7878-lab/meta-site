@@ -13,19 +13,30 @@ export type ArticleCard = {
   publishedAt: string;
   readingMinutes: number;
   featured: boolean;
+  tags: string[];
 };
 
 export function ArticleBrowser({ articles, categories }: { articles: ArticleCard[]; categories: string[] }) {
   const [category, setCategory] = useState("همه");
-  const visible = useMemo(
-    () => (category === "همه" ? articles : articles.filter((article) => article.category === category)),
-    [articles, category],
-  );
-  const featured = category === "همه" ? visible.find((article) => article.featured) ?? visible[0] : undefined;
+  const [query, setQuery] = useState("");
+  const needle = query.trim();
+  const visible = useMemo(() => {
+    return articles.filter((article) => {
+      if (category !== "همه" && article.category !== category) return false;
+      if (!needle) return true;
+      const haystack = [article.title, article.description, article.category, ...article.tags].join(" ");
+      return haystack.includes(needle);
+    });
+  }, [articles, category, needle]);
+  const featured = !needle && category === "همه" ? visible.find((article) => article.featured) ?? visible[0] : undefined;
   const rest = featured ? visible.filter((article) => article.slug !== featured.slug) : visible;
 
   return (
     <div className="blog-browser">
+      <label className="search-field">
+        <span className="sr-only">جستجوی مطلب</span>
+        <input type="search" value={query} placeholder="عنوان، موضوع یا توضیح" onChange={(event) => setQuery(event.target.value)} />
+      </label>
       <div className="filter-row" role="toolbar" aria-label="موضوع مطالب">
         {["همه", ...categories].map((item) => (
           <button
@@ -40,10 +51,10 @@ export function ArticleBrowser({ articles, categories }: { articles: ArticleCard
         ))}
       </div>
 
-      {visible.length === 0 ? <p className="empty-state">در این موضوع مطلبی نیست.</p> : null}
+      {visible.length === 0 ? <p className="empty-state">مطلبی با این عبارت پیدا نشد.</p> : null}
 
       {featured ? (
-        <article className="blog-feature glass-panel">
+        <article className="editorial-feature">
           <ArticleCover category={featured.category} title={featured.title} index={0} />
           <div>
             <p className="meta-row">
@@ -59,13 +70,14 @@ export function ArticleBrowser({ articles, categories }: { articles: ArticleCard
         </article>
       ) : null}
 
-      <div className="blog-grid">
+      <div className="blog-grid editorial-grid">
         {rest.map((article, index) => (
-          <article key={article.slug} className="blog-card glass-panel">
+          <article key={article.slug} className="editorial-card">
             <ArticleCover category={article.category} title={article.title} index={index + 1} />
             <p className="meta-row">
               <span>{article.category}</span>
               <time dateTime={article.publishedAt}>{formatFaDate(article.publishedAt)}</time>
+              <span>{article.readingMinutes.toLocaleString("fa-IR")} دقیقه مطالعه</span>
             </p>
             <h2>
               <Link href={`/blog/${article.slug}`}>{article.title}</Link>

@@ -13,6 +13,7 @@ export type Article = {
   publishedAt: string;
   updatedAt: string;
   featured?: boolean;
+  tags?: string[];
   blocks: ArticleBlock[];
 };
 

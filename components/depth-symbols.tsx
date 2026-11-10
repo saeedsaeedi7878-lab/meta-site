@@ -1,11 +1,23 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, type CSSProperties } from "react";
 import { SVG_LIB, SYMBOLS, type ScienceSymbol } from "@/lib/science-symbols";
 
 function markupFor(name: ScienceSymbol["svg"]) {
   if (name === "orbit") return "";
-  return SVG_LIB[name];
+  return SVG_LIB[name].replace(/\s(?:width|height)="[^"]*"/g, "");
+}
+
+function symbolStyle(symbol: ScienceSymbol): CSSProperties {
+  const size = 80 * symbol.scale;
+  return {
+    width: size,
+    height: size,
+    left: `${symbol.x}%`,
+    top: `${symbol.y}%`,
+    opacity: symbol.opacity,
+    zIndex: symbol.layer,
+  };
 }
 
 function isAppleTouch() {
@@ -101,6 +113,10 @@ export function DepthSymbols() {
         <div
           key={`${symbol.svg}-${symbol.x}-${symbol.y}`}
           className="symbol"
+          style={symbolStyle(symbol)}
+          data-factor={symbol.factor}
+          data-rot-speed={symbol.rotSpeed}
+          data-phase={symbol.phase}
           dangerouslySetInnerHTML={{ __html: markupFor(symbol.svg) }}
         />
       ))}

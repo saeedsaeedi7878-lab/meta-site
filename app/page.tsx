@@ -1,3 +1,5 @@
+import { LatestArticles } from "@/components/latest-articles";
+import { PlansSection } from "@/components/plans-section";
 import { CtaBanner } from "@/components/sections/cta-banner";
 import { Features } from "@/components/sections/features";
 import { Hero } from "@/components/sections/hero";
@@ -24,6 +26,8 @@ export default function HomePage() {
             <Hero />
             <Features />
             <Stats />
+            <PlansSection />
+            <LatestArticles />
             <Testimonials />
             <CtaBanner />
           </main>
