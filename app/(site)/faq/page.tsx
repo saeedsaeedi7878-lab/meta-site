@@ -1,7 +1,7 @@
 import Link from "next/link";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import { FaqList } from "@/components/faq-list";
 import { PageCta } from "@/components/page-cta";
-import { PageHero } from "@/components/page-hero";
 import { faqCategories } from "@/config/faq";
 import { pageMetadata } from "@/lib/seo";
 import { faqJsonLd } from "@/lib/structured-data";
@@ -16,19 +16,31 @@ export default function FaqPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd(faqCategories)) }} />
-      <PageHero
-        eyebrow="سوالات متداول"
-        title="پرسش‌هایی که قبل از ورود پیش می‌آید"
-        lede="پاسخ‌ها از معرفی همین وب‌سایت جمع شده‌اند. اگر جزئیاتی در محصول اعلام نشده، اینجا هم ساخته نشده است."
-        crumbs={[
-          { name: "خانه", path: "/" },
-          { name: "سوالات متداول", path: "/faq" },
-        ]}
-      />
+      <header className="helpdesk-hero">
+        <Breadcrumbs
+          items={[
+            { name: "خانه", path: "/" },
+            { name: "سوالات متداول", path: "/faq" },
+          ]}
+        />
+        <div className="press-hero-grid">
+          <div>
+            <p className="press-kicker">مرکز راهنما</p>
+            <h1>پاسخ روشن، بدون حدس</h1>
+          </div>
+          <p>
+            پرسش‌ها از معرفی همین وب‌سایت جمع شده‌اند. اگر جزئیاتی در محصول اعلام نشده، اینجا هم ساخته نشده است.
+          </p>
+        </div>
+      </header>
       <FaqList categories={faqCategories} />
-      <p className="page-inline-link">
-        سوالتان در این فهرست نیست؟ از <Link href="/contact">صفحه تماس</Link> تلفن و ایمیل را بردارید.
-      </p>
+      <section className="helpdesk-contact" aria-labelledby="faq-contact-title">
+        <h2 id="faq-contact-title">جوابتان اینجا نبود؟</h2>
+        <p>
+          از <Link href="/contact">صفحه تماس</Link> تلفن و ایمیل اعلام‌شده را بردارید. جزئیات حساب و ساخت آزمون داخل خود برنامه
+          است.
+        </p>
+      </section>
       <PageCta title="ورود به برنامه" text="انتخاب پایه، درس، فصل و مبحث داخل خود متاتست انجام می‌شود." label="بزن بریم!" />
     </>
   );

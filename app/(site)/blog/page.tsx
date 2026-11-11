@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { ArticleBrowser, type ArticleCard } from "@/components/article-browser";
 import { ArticleSkeleton } from "@/components/article-skeleton";
-import { PageHero } from "@/components/page-hero";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import { getArticles, getCategories, readingMinutes } from "@/lib/articles";
 import { pageMetadata } from "@/lib/seo";
 
@@ -21,20 +21,37 @@ export default function BlogPage() {
     readingMinutes: readingMinutes(article),
     featured: Boolean(article.featured),
     tags: article.tags ?? [],
+    cover: article.cover,
   }));
 
   return (
     <>
-      <PageHero
-        eyebrow="بلاگ آموزشی"
-        title="یادداشت‌هایی برای تمرین دقیق‌تر"
-        lede="این مطلب‌ها روش مطالعه را دور امکاناتی که متاتست معرفی کرده جمع می‌کنند. گزارش پژوهشی یا ادعای نتیجه‌گیری آماری نیستند."
-        crumbs={[
-          { name: "خانه", path: "/" },
-          { name: "بلاگ", path: "/blog" },
-        ]}
-      />
-      <Suspense fallback={<ArticleSkeleton count={4} />}>
+      <header className="press-hero">
+        <Breadcrumbs
+          items={[
+            { name: "خانه", path: "/" },
+            { name: "بلاگ", path: "/blog" },
+          ]}
+        />
+        <div className="press-hero-grid">
+          <div>
+            <p className="press-kicker">بلاگ آموزشی</p>
+            <h1>یادداشت‌هایی برای تمرین دقیق‌تر</h1>
+          </div>
+          <p>
+            این مطلب‌ها روش مطالعه را دور امکاناتی که متاتست معرفی کرده جمع می‌کنند. گزارش پژوهشی یا ادعای نتیجه‌گیری
+            آماری نیستند.
+          </p>
+        </div>
+      </header>
+      <Suspense
+        fallback={
+          <>
+            <ArticleSkeleton variant="feature" />
+            <ArticleSkeleton count={3} />
+          </>
+        }
+      >
         <ArticleBrowser articles={cards} categories={getCategories()} />
       </Suspense>
     </>

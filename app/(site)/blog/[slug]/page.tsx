@@ -53,9 +53,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd(article)) }} />
       <ReadingProgress />
-      <article className="article-layout reader">
+      <article className="folio">
         <Breadcrumbs items={crumbs} />
-        <p className="meta-row">
+        <p className="press-meta">
           <span>{article.category}</span>
           <time dateTime={article.publishedAt}>انتشار {formatFaDate(article.publishedAt)}</time>
           {article.updatedAt !== article.publishedAt ? (
@@ -63,15 +63,17 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           ) : null}
           <span>{minutes.toLocaleString("fa-IR")} دقیقه مطالعه</span>
         </p>
-        <h1 className="page-title shine-title">{article.title}</h1>
-        <p className="page-lede">{article.description}</p>
-        <ArticleCover category={article.category} title={article.title} index={articles.findIndex((item) => item.slug === article.slug)} />
-        <div className="article-grid">
+        <h1>{article.title}</h1>
+        <p className="folio-lede">{article.description}</p>
+        <ArticleCover category={article.category} title={article.title} cover={article.cover} variant="feature" />
+        <div className="folio-grid">
           <Suspense fallback={<ArticleSkeleton variant="reader" />}>
-            <ArticleBody article={article} />
+            <div className="folio-body">
+              <ArticleBody article={article} />
+            </div>
           </Suspense>
           {headings.length > 1 ? (
-            <nav className="toc" aria-label="فهرست مطلب">
+            <nav className="folio-toc" aria-label="فهرست مطلب">
               <p>در این مطلب</p>
               <ol>
                 {headings.map((heading) => (
@@ -85,20 +87,21 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         </div>
       </article>
       {related.length > 0 ? (
-        <section className="related" aria-labelledby="related-title">
-          <h2 id="related-title" className="section-heading">
-            مطالب مرتبط
-          </h2>
-          <div className="blog-grid">
+        <section className="folio-related" aria-labelledby="related-title">
+          <h2 id="related-title">مطالب مرتبط</h2>
+          <div className="press-list">
             {related.map((item) => (
-                <article key={item.slug} className="editorial-card">
-                <p className="meta-row">
-                  <span>{item.category}</span>
-                </p>
-                <h3>
-                  <Link href={`/blog/${item.slug}`}>{item.title}</Link>
-                </h3>
-                <p>{item.description}</p>
+              <article key={item.slug} className="press-row">
+                <Link href={`/blog/${item.slug}`} className="press-row-link">
+                  <ArticleCover category={item.category} title={item.title} cover={item.cover} variant="card" />
+                  <div className="press-row-copy">
+                    <p className="press-meta">
+                      <span>{item.category}</span>
+                    </p>
+                    <h3>{item.title}</h3>
+                    <p>{item.description}</p>
+                  </div>
+                </Link>
               </article>
             ))}
           </div>

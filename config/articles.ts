@@ -14,6 +14,8 @@ export type Article = {
   updatedAt: string;
   featured?: boolean;
   tags?: string[];
+  /** Cover image URL. Null keeps a quiet editorial slot until a photograph is supplied. */
+  cover: string | null;
   blocks: ArticleBlock[];
 };
 
@@ -32,6 +34,7 @@ export const articles: Article[] = [
     publishedAt: "2026-02-12",
     updatedAt: "2026-02-12",
     featured: true,
+    cover: null,
     blocks: [
       {
         type: "paragraph",
@@ -75,6 +78,7 @@ export const articles: Article[] = [
     category: "پیشرفت",
     publishedAt: "2026-03-04",
     updatedAt: "2026-03-04",
+    cover: null,
     blocks: [
       {
         type: "paragraph",
@@ -121,6 +125,7 @@ export const articles: Article[] = [
     category: "یادگیری",
     publishedAt: "2026-04-16",
     updatedAt: "2026-04-16",
+    cover: null,
     blocks: [
       {
         type: "paragraph",
@@ -161,6 +166,7 @@ export const articles: Article[] = [
     category: "روش مطالعه",
     publishedAt: "2026-05-09",
     updatedAt: "2026-05-09",
+    cover: null,
     blocks: [
       {
         type: "paragraph",

@@ -1,26 +1,25 @@
-const motifs = ["∑", "λ", "π", "Δ"] as const;
-
 export function ArticleCover({
   category,
   title,
-  index,
+  cover,
+  variant = "card",
 }: {
   category: string;
   title: string;
-  index: number;
+  cover: string | null;
+  variant?: "card" | "feature" | "rail";
 }) {
-  const motif = motifs[index % motifs.length];
   return (
-    <div className="article-cover-frame">
-      <svg className="article-cover" viewBox="0 0 640 360" role="img" aria-label={`طرح جلد: ${title}`}>
-        <rect width="640" height="360" fill="#0c0c16" />
-        <circle cx="120" cy="70" r="120" fill="rgba(139,92,246,0.16)" />
-        <circle cx="540" cy="300" r="90" fill="rgba(139,92,246,0.08)" />
-        <text x="500" y="250" fill="rgba(248,247,255,0.14)" fontSize="140" fontFamily="Tahoma, sans-serif">
-          {motif}
-        </text>
-      </svg>
-      <span className="article-cover-label">{category}</span>
-    </div>
+    <figure className={`media-slot is-${variant}`}>
+      {cover ? (
+        <img src={cover} alt="" className="media-shot" />
+      ) : (
+        <div className="media-empty" role="img" aria-label={`جای تصویر جلد: ${title}`}>
+          <span className="media-empty-mark" aria-hidden="true" />
+          <span className="media-empty-copy">تصویر جلد</span>
+        </div>
+      )}
+      <figcaption className="media-kicker">{category}</figcaption>
+    </figure>
   );
 }

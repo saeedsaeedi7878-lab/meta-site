@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRef, type KeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 
 function Chevron({ direction }: { direction: "start" | "end" }) {
@@ -15,12 +16,14 @@ export function SnapRail({
   titleId,
   title,
   lede,
+  action,
   children,
 }: {
   label: string;
   titleId: string;
   title: string;
   lede: string;
+  action?: { href: string; label: string };
   children: ReactNode;
 }) {
   const scroller = useRef<HTMLDivElement>(null);
@@ -90,6 +93,11 @@ export function SnapRail({
           <p>{lede}</p>
         </div>
         <div className="rail-controls">
+          {action ? (
+            <Link className="press-index-link" href={action.href}>
+              {action.label}
+            </Link>
+          ) : null}
           <button type="button" className="rail-btn" onClick={() => move(document.dir === "rtl" ? 1 : -1)} aria-label="قبلی">
             <Chevron direction="end" />
           </button>

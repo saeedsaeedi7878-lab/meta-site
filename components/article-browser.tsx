@@ -14,12 +14,17 @@ export type ArticleCard = {
   readingMinutes: number;
   featured: boolean;
   tags: string[];
+  cover: string | null;
 };
+
+const PAGE_SIZE = 6;
 
 export function ArticleBrowser({ articles, categories }: { articles: ArticleCard[]; categories: string[] }) {
   const [category, setCategory] = useState("همه");
   const [query, setQuery] = useState("");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const needle = query.trim();
+
   const visible = useMemo(() => {
     return articles.filter((article) => {
       if (category !== "همه" && article.category !== category) return false;
@@ -28,64 +33,113 @@ export function ArticleBrowser({ articles, categories }: { articles: ArticleCard
       return haystack.includes(needle);
     });
   }, [articles, category, needle]);
-  const featured = !needle && category === "همه" ? visible.find((article) => article.featured) ?? visible[0] : undefined;
+
+  const browsing = Boolean(needle) || category !== "همه";
+  const featured = !browsing ? visible.find((article) => article.featured) ?? visible[0] : undefined;
   const rest = featured ? visible.filter((article) => article.slug !== featured.slug) : visible;
+  const shown = rest.slice(0, visibleCount);
+  const canLoadMore = rest.length > visibleCount;
+
+  function reset() {
+    setQuery("");
+    setCategory("همه");
+    setVisibleCount(PAGE_SIZE);
+  }
 
   return (
-    <div className="blog-browser">
-      <label className="search-field">
-        <span className="sr-only">جستجوی مطلب</span>
-        <input type="search" value={query} placeholder="عنوان، موضوع یا توضیح" onChange={(event) => setQuery(event.target.value)} />
-      </label>
-      <div className="filter-row" role="toolbar" aria-label="موضوع مطالب">
-        {["همه", ...categories].map((item) => (
-          <button
-            key={item}
-            type="button"
-            className={item === category ? "is-active" : undefined}
-            aria-pressed={item === category}
-            onClick={() => setCategory(item)}
-          >
-            {item}
+    <div className="press">
+      <div className="press-tools">
+        <label className="press-search">
+          <span className="sr-only">جستجوی مطلب</span>
+          <input
+            type="search"
+            value={query}
+            placeholder="عنوان، موضوع، برچسب یا توضیح"
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setVisibleCount(PAGE_SIZE);
+            }}
+          />
+        </label>
+        {needle || category !== "همه" ? (
+          <button type="button" className="press-clear" onClick={reset}>
+            پاک کردن فیلتر
           </button>
-        ))}
+        ) : null}
+        <div className="press-cats" role="toolbar" aria-label="موضوع مطالب">
+          {["همه", ...categories].map((item) => (
+            <button
+              key={item}
+              type="button"
+              className={item === category ? "is-active" : undefined}
+              aria-pressed={item === category}
+              onClick={() => {
+                setCategory(item);
+                setVisibleCount(PAGE_SIZE);
+              }}
+            >
+              {item}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {visible.length === 0 ? <p className="empty-state">مطلبی با این عبارت پیدا نشد.</p> : null}
+      {visible.length === 0 ? (
+        <div className="press-empty">
+          <p>مطلبی با این عبارت پیدا نشد.</p>
+          <button type="button" className="press-clear" onClick={reset}>
+            نمایش همه مطالب
+          </button>
+        </div>
+      ) : null}
 
       {featured ? (
-        <article className="editorial-feature">
-          <ArticleCover category={featured.category} title={featured.title} index={0} />
-          <div>
-            <p className="meta-row">
-              <span>{featured.category}</span>
-              <time dateTime={featured.publishedAt}>{formatFaDate(featured.publishedAt)}</time>
-              <span>{featured.readingMinutes.toLocaleString("fa-IR")} دقیقه مطالعه</span>
-            </p>
-            <h2>
-              <Link href={`/blog/${featured.slug}`}>{featured.title}</Link>
-            </h2>
-            <p>{featured.description}</p>
-          </div>
+        <article className="press-feature">
+          <Link href={`/blog/${featured.slug}`} className="press-feature-link">
+            <div className="press-feature-copy">
+              <p className="press-meta">
+                <span>ویژه</span>
+                <span>{featured.category}</span>
+                <time dateTime={featured.publishedAt}>{formatFaDate(featured.publishedAt)}</time>
+                <span>{featured.readingMinutes.toLocaleString("fa-IR")} دقیقه مطالعه</span>
+              </p>
+              <h2>{featured.title}</h2>
+              <p>{featured.description}</p>
+              <span className="press-more">خواندن مطلب</span>
+            </div>
+            <ArticleCover category={featured.category} title={featured.title} cover={featured.cover} variant="feature" />
+          </Link>
         </article>
       ) : null}
 
-      <div className="blog-grid editorial-grid">
-        {rest.map((article, index) => (
-          <article key={article.slug} className="editorial-card">
-            <ArticleCover category={article.category} title={article.title} index={index + 1} />
-            <p className="meta-row">
-              <span>{article.category}</span>
-              <time dateTime={article.publishedAt}>{formatFaDate(article.publishedAt)}</time>
-              <span>{article.readingMinutes.toLocaleString("fa-IR")} دقیقه مطالعه</span>
-            </p>
-            <h2>
-              <Link href={`/blog/${article.slug}`}>{article.title}</Link>
-            </h2>
-            <p>{article.description}</p>
-          </article>
-        ))}
-      </div>
+      {shown.length > 0 ? (
+        <div className="press-list">
+          {shown.map((article) => (
+            <article key={article.slug} className="press-row">
+              <Link href={`/blog/${article.slug}`} className="press-row-link">
+                <ArticleCover category={article.category} title={article.title} cover={article.cover} variant="card" />
+                <div className="press-row-copy">
+                  <p className="press-meta">
+                    <span>{article.category}</span>
+                    <time dateTime={article.publishedAt}>{formatFaDate(article.publishedAt)}</time>
+                    <span>{article.readingMinutes.toLocaleString("fa-IR")} دقیقه مطالعه</span>
+                  </p>
+                  <h2>{article.title}</h2>
+                  <p>{article.description}</p>
+                </div>
+              </Link>
+            </article>
+          ))}
+        </div>
+      ) : null}
+
+      {canLoadMore ? (
+        <div className="press-more-wrap">
+          <button type="button" className="press-load" onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}>
+            نمایش مطالب بیشتر
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }
