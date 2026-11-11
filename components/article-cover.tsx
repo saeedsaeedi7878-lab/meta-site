@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+
 export function ArticleCover({
   category,
   title,
@@ -7,19 +11,24 @@ export function ArticleCover({
   category: string;
   title: string;
   cover: string | null;
-  variant?: "card" | "feature" | "rail";
+  variant?: "card" | "feature" | "deck";
 }) {
+  const [ready, setReady] = useState(!cover);
+
   return (
-    <figure className={`media-slot is-${variant}`}>
+    <figure className={`journal-cover is-${variant}`}>
       {cover ? (
-        <img src={cover} alt="" className="media-shot" />
+        <img
+          src={cover}
+          alt={title}
+          className={ready ? "is-ready" : undefined}
+          onLoad={() => setReady(true)}
+        />
       ) : (
-        <div className="media-empty" role="img" aria-label={`جای تصویر جلد: ${title}`}>
-          <span className="media-empty-mark" aria-hidden="true" />
-          <span className="media-empty-copy">تصویر جلد</span>
-        </div>
+        <div className="journal-cover-empty" role="img" aria-label={`جلد «${title}» هنوز تصویری ندارد`} />
       )}
-      <figcaption className="media-kicker">{category}</figcaption>
+      {cover && !ready ? <span className="journal-bone" aria-hidden="true" /> : null}
+      {variant === "feature" ? null : <figcaption>{category}</figcaption>}
     </figure>
   );
 }

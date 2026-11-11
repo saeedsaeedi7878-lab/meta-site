@@ -7,40 +7,34 @@ export function ArticleSkeleton({
 }) {
   if (variant === "reader") {
     return (
-      <div className="skeleton-reader" aria-hidden="true">
-        <div className="skeleton-block skeleton-media is-cover" />
-        <div className="skeleton-block skeleton-title" />
-        <div className="skeleton-block" />
-        <div className="skeleton-block" />
-        <div className="skeleton-block short" />
+      <div className="journal-skeleton" aria-hidden="true">
+        <div className="journal-bone is-hero" />
+        <div className="journal-bone is-line is-title" />
+        <div className="journal-bone is-line" />
+        <div className="journal-bone is-line is-short" />
       </div>
     );
   }
-
   if (variant === "feature") {
     return (
-      <div className="skeleton-feature" aria-hidden="true">
-        <div className="skeleton-block skeleton-media is-feature" />
-        <div className="skeleton-feature-copy">
-          <div className="skeleton-block short" />
-          <div className="skeleton-block skeleton-title" />
-          <div className="skeleton-block" />
-          <div className="skeleton-block" />
+      <div className="journal-skeleton is-feature" aria-hidden="true">
+        <div className="journal-bone is-copy">
+          <div className="journal-bone is-line is-short" />
+          <div className="journal-bone is-line is-title" />
+          <div className="journal-bone is-line" />
         </div>
+        <div className="journal-bone is-hero" />
       </div>
     );
   }
-
   return (
-    <div className="skeleton-list" aria-hidden="true">
+    <div className="journal-skeleton-grid" aria-hidden="true">
       {Array.from({ length: count }, (_, index) => (
-        <div key={index} className="skeleton-row">
-          <div className="skeleton-block skeleton-media" />
-          <div className="skeleton-row-copy">
-            <div className="skeleton-block short" />
-            <div className="skeleton-block skeleton-title" />
-            <div className="skeleton-block" />
-          </div>
+        <div key={index} className="journal-skeleton">
+          <div className="journal-bone is-card" />
+          <div className="journal-bone is-line is-title" />
+          <div className="journal-bone is-line" />
+          <div className="journal-bone is-line is-short" />
         </div>
       ))}
     </div>

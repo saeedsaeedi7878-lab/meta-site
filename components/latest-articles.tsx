@@ -1,57 +1,54 @@
+"use client";
+
 import Link from "next/link";
-import { ArticleCover } from "@/components/article-cover";
-import { SnapRail } from "@/components/snap-rail";
+import type { KeyboardEvent } from "react";
+import { ArticleTile } from "@/components/article-tile";
 import { getArticles, readingMinutes } from "@/lib/articles";
-import { formatFaDate } from "@/lib/format";
+
+function scrollDeck(event: KeyboardEvent<HTMLDivElement>) {
+  if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+  event.preventDefault();
+  const distance = event.key === "ArrowLeft" ? -260 : 260;
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  event.currentTarget.scrollBy({ left: distance, behavior: reduce ? "auto" : "smooth" });
+}
 
 export function LatestArticles() {
   const articles = getArticles();
   return (
-    <section className="showcase press-rail" aria-labelledby="latest-title">
-      {articles.length === 0 ? (
-        <>
-          <div className="showcase-head">
-            <div>
-              <h2 id="latest-title">تازه‌های بلاگ</h2>
-              <p>آخرین یادداشت‌های منتشرشده، از همان فهرست بلاگ.</p>
-            </div>
-            <Link className="press-index-link" href="/blog">
-              همه مطالب
-            </Link>
+    <section className="journal-deck" aria-labelledby="latest-title">
+      <div className="journal-deck-panel">
+        <header className="journal-deck-head">
+          <div>
+            <h2 id="latest-title">تازه‌های بلاگ</h2>
+            <p>آخرین یادداشت‌های منتشرشده.</p>
           </div>
-          <p className="empty-state">هنوز مطلبی منتشر نشده است.</p>
-        </>
-      ) : (
-        <>
-          <SnapRail
-            label="تازه‌ترین مطالب"
-            titleId="latest-title"
-            title="تازه‌های بلاگ"
-            lede="آخرین یادداشت‌های منتشرشده، از همان فهرست بلاگ."
-            action={{ href: "/blog", label: "همه مطالب" }}
-          >
-            {articles.map((article, index) => (
-              <article key={article.slug} className={index === 0 ? "story-sheet is-lead" : "story-sheet"}>
-                <Link href={`/blog/${article.slug}`}>
-                  <ArticleCover
-                    category={article.category}
-                    title={article.title}
-                    cover={article.cover}
-                    variant={index === 0 ? "feature" : "rail"}
-                  />
-                  <p className="press-meta">
-                    <span>{article.category}</span>
-                    <time dateTime={article.publishedAt}>{formatFaDate(article.publishedAt)}</time>
-                    <span>{readingMinutes(article).toLocaleString("fa-IR")} دقیقه مطالعه</span>
-                  </p>
-                  <h3>{article.title}</h3>
-                  <p>{article.description}</p>
-                </Link>
-              </article>
+        </header>
+        {articles.length === 0 ? (
+          <p className="journal-empty">هنوز مطلبی منتشر نشده است.</p>
+        ) : (
+          <div className="journal-deck-row" tabIndex={0} role="region" aria-label="تازه‌ترین مطالب" onKeyDown={scrollDeck}>
+            {articles.map((article) => (
+              <ArticleTile
+                key={article.slug}
+                variant="deck"
+                article={{
+                  slug: article.slug,
+                  title: article.title,
+                  description: article.description,
+                  category: article.category,
+                  publishedAt: article.publishedAt,
+                  readingMinutes: readingMinutes(article),
+                  cover: article.cover,
+                }}
+              />
             ))}
-          </SnapRail>
-        </>
-      )}
+          </div>
+        )}
+        <Link className="journal-deck-all" href="/blog">
+          همه مطالب
+        </Link>
+      </div>
     </section>
   );
 }
