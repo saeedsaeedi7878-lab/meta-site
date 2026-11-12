@@ -1,11 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent } from "react";
-import { ChevronLeft, Clock, ListFilter, Search, SlidersHorizontal, X } from "lucide-react";
-import { coverTone } from "@/lib/articles";
-import { formatFaDate } from "@/lib/format";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { Search, SlidersHorizontal, X } from "lucide-react";
+import { assets } from "@/config/assets";
+import { PostCard } from "@/components/post-card";
 
 export type ArticleCard = {
   slug: string;
@@ -159,14 +158,6 @@ export function ArticleBrowser({
 
   const filtersActive = (category !== "همه" ? 1 : 0) + (query.trim() ? 1 : 0) + (sort !== "new" ? 1 : 0);
   const sortLabel = SORTS.find((item) => item.id === sort)?.label ?? "تازه‌ترین";
-  const title = category === "همه" ? "تازه‌ترین نوشته‌ها" : category;
-
-  function spotlight(event: PointerEvent<HTMLElement>) {
-    if (event.pointerType === "touch") return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    event.currentTarget.style.setProperty("--mx", `${event.clientX - rect.left}px`);
-    event.currentTarget.style.setProperty("--my", `${event.clientY - rect.top}px`);
-  }
 
   const filters = (
     <Filters
@@ -180,25 +171,53 @@ export function ArticleBrowser({
     />
   );
 
+  const chips = filtersActive > 0 ? (
+    <div className="library-chips">
+      {category !== "همه" ? (
+        <span>
+          {category}
+          <button type="button" aria-label={`حذف دسته ${category}`} onClick={() => onCategory("همه")}>
+            <X size={10} strokeWidth={2.4} />
+          </button>
+        </span>
+      ) : null}
+      {query.trim() ? (
+        <span>
+          «{query.trim()}»
+          <button type="button" aria-label="حذف جستجو" onClick={() => onQuery("")}>
+            <X size={10} strokeWidth={2.4} />
+          </button>
+        </span>
+      ) : null}
+      {sort !== "new" ? (
+        <span>
+          {sortLabel}
+          <button type="button" aria-label="بازگشت به تازه‌ترین" onClick={() => onSort("new")}>
+            <X size={10} strokeWidth={2.4} />
+          </button>
+        </span>
+      ) : null}
+    </div>
+  ) : null;
+
   return (
     <div className="library">
-      <aside className="library-aside" aria-label="جستجو و فیلترها">
-        <div className="library-brand">
-          <span className="library-mark" aria-hidden="true">
-            <ListFilter size={13} strokeWidth={2.2} />
-          </span>
-          <b>وبلاگ</b>
-          <span className="library-live">
-            <i />
-            {articles.length.toLocaleString("fa-IR")} نوشته
-          </span>
+      <div className="library-side">
+        <div className="library-intro">
+          <h1 className="shine-title">وبلاگ</h1>
+          <div className="library-icon-wrap">
+            <img src={assets.bookIcon} alt="" width={96} height={96} />
+          </div>
         </div>
-        <SearchField value={query} onChange={onQuery} placeholder="جستجو در عنوان و موضوع…" label="جستجو در نوشته‌ها" />
-        {filters}
-        <button type="button" className="library-reset" onClick={resetAll} disabled={filtersActive === 0}>
-          پاک کردن فیلترها
-        </button>
-      </aside>
+        <aside className="library-aside" aria-label="جستجو و فیلترها">
+          <SearchField value={query} onChange={onQuery} placeholder="جستجو در عنوان و موضوع…" label="جستجو در نوشته‌ها" />
+          {chips}
+          {filters}
+          <button type="button" className="btn-line library-reset" onClick={resetAll} disabled={filtersActive === 0}>
+            پاک کردن فیلترها
+          </button>
+        </aside>
+      </div>
 
       <div className="library-main">
         <div className="library-mbar">
@@ -218,97 +237,38 @@ export function ArticleBrowser({
           </div>
         </div>
 
-        <div className="library-bar">
-          <div>
-            <h1>{title}</h1>
-            <p aria-live="polite">
-              <b>{visible.length.toLocaleString("fa-IR")}</b>
-              {filtersActive > 0 ? ` نوشته از ${articles.length.toLocaleString("fa-IR")}` : " نوشته"}
-            </p>
-          </div>
-          <p className="library-sort-note">
-            <i />
-            مرتب: {sortLabel}
-          </p>
-        </div>
-
-        {filtersActive > 0 ? (
-          <div className="library-chips">
-            {category !== "همه" ? (
-              <span>
-                {category}
-                <button type="button" aria-label={`حذف دسته ${category}`} onClick={() => onCategory("همه")}>
-                  <X size={10} strokeWidth={2.4} />
-                </button>
-              </span>
-            ) : null}
-            {query.trim() ? (
-              <span>
-                «{query.trim()}»
-                <button type="button" aria-label="حذف جستجو" onClick={() => onQuery("")}>
-                  <X size={10} strokeWidth={2.4} />
-                </button>
-              </span>
-            ) : null}
-            {sort !== "new" ? (
-              <span>
-                {sortLabel}
-                <button type="button" aria-label="بازگشت به تازه‌ترین" onClick={() => onSort("new")}>
-                  <X size={10} strokeWidth={2.4} />
-                </button>
-              </span>
-            ) : null}
-          </div>
-        ) : null}
-
-        {visible.length === 0 ? (
-          <div className="library-empty">
-            <b>چیزی پیدا نشد</b>
-            <p>با این عبارت یا فیلتر نوشته‌ای نداریم.</p>
-            <button type="button" onClick={resetAll}>
-              پاک کردن فیلترها
-            </button>
-          </div>
-        ) : (
-          <div className="library-grid">
-            {visible.map((article, index) => (
-              <article
-                key={article.slug}
-                className="library-card"
-                style={{ "--i": index } as CSSProperties}
-                onPointerMove={spotlight}
-              >
-                <Link href={`/blog/${article.slug}`}>
-                  <div className="library-cover">
-                    {article.cover ? (
-                      <img src={article.cover} alt="" />
-                    ) : (
-                      <div className={`read-fill is-${coverTone(article.slug)}`} />
-                    )}
-                    <span className="library-badge">
-                      <i />
-                      {article.category}
-                    </span>
-                    <span className="library-go" aria-hidden="true">
-                      <ChevronLeft size={14} strokeWidth={2} />
-                    </span>
-                  </div>
-                  <div className="library-copy">
-                    <h2>{article.title}</h2>
-                    <p>{article.description}</p>
-                    <p className="library-foot">
-                      <time dateTime={article.publishedAt}>{formatFaDate(article.publishedAt)}</time>
-                      <span>
-                        <Clock size={12} strokeWidth={1.75} aria-hidden="true" />
-                        {article.readingMinutes.toLocaleString("fa-IR")} دقیقه
-                      </span>
-                    </p>
-                  </div>
-                </Link>
-              </article>
+        <div className="library-stage">
+          <div className="post-bones" aria-hidden="true">
+            {Array.from({ length: 3 }, (_, index) => (
+              <div className="post-bone" key={index}>
+                <div className="post-bone-copy">
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                </div>
+                <div className="post-bone-visual" />
+              </div>
             ))}
           </div>
-        )}
+          {visible.length === 0 ? (
+            <div className="library-empty">
+              <b>چیزی پیدا نشد</b>
+              <p>با این عبارت یا فیلتر نوشته‌ای نداریم.</p>
+              <button type="button" className="btn-fill" onClick={resetAll}>
+                پاک کردن فیلترها
+              </button>
+            </div>
+          ) : (
+            <div className="library-grid" key={`${category}|${sort}|${norm(query)}`}>
+              {visible.map((article, index) => (
+                <div key={article.slug} style={{ "--i": index } as CSSProperties}>
+                  <PostCard article={article} />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="library-sheet" id="library-sheet" hidden={!sheet}>
@@ -323,10 +283,10 @@ export function ArticleBrowser({
           </div>
           <div className="library-sheet-body">{filters}</div>
           <div className="library-sheet-foot">
-            <button type="button" onClick={resetAll}>
+            <button type="button" className="btn-line" onClick={resetAll}>
               پاک کردن
             </button>
-            <button type="button" className="is-go" onClick={() => setSheet(false)}>
+            <button type="button" className="btn-fill" onClick={() => setSheet(false)}>
               نمایش {visible.length.toLocaleString("fa-IR")} نوشته
             </button>
           </div>
@@ -404,7 +364,12 @@ function Filters({
       </div>
       <div className="library-group">
         <h2>مرتب‌سازی</h2>
-        <div className="library-seg" role="group" aria-label="ترتیب نمایش">
+        <div
+          className="library-seg"
+          role="group"
+          aria-label="ترتیب نمایش"
+          style={{ "--sort-i": Math.max(0, SORTS.findIndex((item) => item.id === sort)) } as CSSProperties}
+        >
           {SORTS.map((item) => (
             <button key={item.id} type="button" aria-pressed={sort === item.id} onClick={() => onSort(item.id)}>
               {item.label}
