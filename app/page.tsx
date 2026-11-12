@@ -9,10 +9,12 @@ import { Stats } from "@/components/sections/stats";
 import { Testimonials } from "@/components/sections/testimonials";
 import { DepthSymbols } from "@/components/depth-symbols";
 import { PageInteractions } from "@/components/page-interactions";
+import { getTariffs } from "@/lib/plans";
 import { organizationJsonLd } from "@/lib/structured-data";
 
-export default function HomePage() {
+export default async function HomePage() {
   const jsonLd = organizationJsonLd();
+  const tariffs = await getTariffs();
 
   return (
     <>
@@ -26,7 +28,7 @@ export default function HomePage() {
             <Hero />
             <Features />
             <Stats />
-            <PlansSection />
+            <PlansSection tariffs={tariffs} />
             <LatestArticles />
             <Testimonials />
             <CtaBanner />

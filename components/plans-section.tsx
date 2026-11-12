@@ -1,73 +1,109 @@
-import Link from "next/link";
-import { SnapRail } from "@/components/snap-rail";
-import { plans } from "@/config/plans";
-import { site } from "@/config/site";
+"use client";
 
-export function PlansSection() {
-  if (plans.length === 0) {
-    return (
-      <section className="showcase plan-stage" aria-labelledby="plans-title">
-        <div className="plan-await">
-          <div className="plan-await-copy">
-            <p className="sec-eyebrow">تعرفه</p>
-            <h2 id="plans-title">پلن‌ها هنوز اعلام نشده‌اند</h2>
-            <p>
-              نام، قیمت، دوره پرداخت و فهرست مزایا در این پروژه ثبت نشده است. به‌محض اعلام تعرفه، همان داده‌ها در این بخش
-              نمایش داده می‌شوند. تا آن زمان می‌توانید از خود برنامه شروع کنید.
-            </p>
-            <a className="plan-cta" href={site.appUrl}>
-              ورود به برنامه
-            </a>
-          </div>
-          <div className="plan-await-visual" aria-hidden="true">
-            <span>پایه</span>
-            <span>درس</span>
-            <span>فصل</span>
-            <span>مبحث</span>
-          </div>
-        </div>
-      </section>
-    );
+import { useEffect, useState, type CSSProperties } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { CalendarDays, Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { assets } from "@/config/assets";
+import type { Tariff } from "@/lib/plans";
+
+export function PlansSection({ tariffs }: { tariffs: Tariff[] }) {
+  const reduce = useReducedMotion();
+  const [index, setIndex] = useState(0);
+  const [play, setPlay] = useState(0);
+  const plan = tariffs[index] ?? null;
+
+  useEffect(() => {
+    if (reduce || tariffs.length < 2) return;
+    const timer = window.setInterval(() => {
+      setIndex((current) => (current + 1) % tariffs.length);
+      setPlay((value) => value + 1);
+    }, 5200);
+    return () => window.clearInterval(timer);
+  }, [reduce, index, tariffs.length]);
+
+  function show(next: number) {
+    const count = tariffs.length;
+    if (!count) return;
+    setIndex(((next % count) + count) % count);
+    setPlay((value) => value + 1);
   }
 
   return (
-    <section className="showcase plan-stage" aria-labelledby="plans-title">
-      <SnapRail
-        label="پلن‌های متاتست"
-        titleId="plans-title"
-        title="پلن‌ها"
-        lede="انتخاب مسیر تمرین بر اساس تعرفه‌ای که اعلام شده است."
-      >
-        {plans.map((plan, index) => (
-          <article
-            key={plan.id}
-            className={plan.featured ? `plan-sheet is-featured is-tone-${index % 3}` : `plan-sheet is-tone-${index % 3}`}
-          >
-            {plan.featured ? <p className="plan-kicker">پیشنهاد ویژه</p> : <p className="plan-kicker">پلن</p>}
-            <h3>{plan.name}</h3>
-            {plan.price ? (
-              <p className="plan-price">
-                <span>{plan.price}</span>
-                {plan.period ? <small>{plan.period}</small> : null}
-              </p>
-            ) : null}
-            {plan.description ? <p>{plan.description}</p> : null}
-            {plan.features.length > 0 ? (
-              <ul>
-                {plan.features.map((feature, featureIndex) => (
-                  <li key={`${plan.id}-${featureIndex}`}>{feature}</li>
-                ))}
-              </ul>
-            ) : null}
-            <a className="plan-cta" href={site.appUrl}>
-              {plan.cta}
-            </a>
-          </article>
-        ))}
-      </SnapRail>
-      <p className="plan-footnote">
-        جزئیات حساب داخل برنامه است. برای پرسش‌های عمومی به <Link href="/faq">سوالات متداول</Link> سر بزنید.
-      </p>
+    <section className="tariff" aria-labelledby="plans-title">
+      <h2 id="plans-title" className="shine-title tariff-title">
+        تعرفه
+      </h2>
+      {plan ? (
+        <>
+          <div className="tariff-stage">
+            <AnimatePresence mode="wait">
+              <motion.article
+                key={plan.id}
+                className="tariff-card"
+                style={{ "--tone": plan.color } as CSSProperties}
+                initial={reduce ? false : { opacity: 0, x: 28 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={reduce ? undefined : { opacity: 0, x: -28 }}
+                transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 280, damping: 30, mass: 0.75 }}
+              >
+                <div className="tariff-copy">
+                  <div className="tariff-marks">
+                    {plan.popular ? <span className="tariff-popular">محبوب</span> : null}
+                    {plan.purchasable ? null : <span className="tariff-closed">فعلاً قابل خرید نیست</span>}
+                  </div>
+                  <h3>{plan.name}</h3>
+                  <p className="tariff-price">
+                    {plan.comparePrice ? <s>{plan.comparePrice}</s> : null}
+                    <b>{plan.price}</b>
+                    <span>تومان</span>
+                    {plan.days ? (
+                      <>
+                        <i />
+                        <CalendarDays size={15} strokeWidth={1.75} aria-hidden="true" />
+                        <span>{plan.days}</span>
+                      </>
+                    ) : null}
+                  </p>
+                  <ul>
+                    {plan.features.map((feature) => (
+                      <li key={feature}>
+                        <Check size={16} strokeWidth={2.25} aria-hidden="true" />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="tariff-icon" aria-hidden="true">
+                  <lord-icon
+                    key={`${plan.id}-${play}`}
+                    src={plan.free ? assets.freeBadge : assets.ribbonBadge}
+                    colors={`primary:#F8F7FF,secondary:${plan.color}`}
+                    trigger="in"
+                    state="in-reveal"
+                  />
+                </div>
+              </motion.article>
+            </AnimatePresence>
+          </div>
+          <div className="tariff-nav">
+            <button type="button" className="btn-line tariff-arrow" aria-label="پلن قبلی" onClick={() => show(index - 1)}>
+              <ChevronRight size={16} strokeWidth={1.75} aria-hidden="true" />
+            </button>
+            <div className="tariff-picks">
+              {tariffs.map((item, itemIndex) => (
+                <button key={item.id} type="button" aria-current={itemIndex === index} onClick={() => show(itemIndex)}>
+                  {item.name.replace(/^اشتراک\s+/, "")}
+                </button>
+              ))}
+            </div>
+            <button type="button" className="btn-line tariff-arrow" aria-label="پلن بعدی" onClick={() => show(index + 1)}>
+              <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" />
+            </button>
+          </div>
+        </>
+      ) : (
+        <p className="tariff-note">تعرفه‌ها الان در دسترس نیست.</p>
+      )}
     </section>
   );
 }

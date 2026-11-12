@@ -1,5 +1,6 @@
 "use client";
 
+import { CalendarDays, MessageCircle, ThumbsUp } from "lucide-react";
 import { useSyncExternalStore, useState, type FormEvent } from "react";
 
 type Note = {
@@ -8,6 +9,27 @@ type Note = {
   text: string;
   at: string;
 };
+
+const SAMPLES: Note[] = [
+  {
+    id: "sample-1",
+    name: "سارا",
+    text: "قبل از تست، مبحث را روی کاغذ کوچک کردم. نشست کوتاه‌تر و معلوم‌تر شد.",
+    at: "2026-04-18T08:00:00.000Z",
+  },
+  {
+    id: "sample-2",
+    name: "کیان",
+    text: "نمودار را به یک کار بعدی ترجمه کردم، نه به یک نمره کلی.",
+    at: "2026-03-09T08:00:00.000Z",
+  },
+  {
+    id: "sample-3",
+    name: "هستی",
+    text: "یک مبحث در هر نشست را از همین روش برداشتم و سوال‌های خارج از محدوده را جدا گذاشتم.",
+    at: "2026-02-21T08:00:00.000Z",
+  },
+];
 
 const EMPTY: Note[] = [];
 const cache = new Map<string, { raw: string; notes: Note[] }>();
@@ -59,7 +81,8 @@ function formatWhen(iso: string) {
 }
 
 export function ArticleComments({ slug }: { slug: string }) {
-  const notes = useSyncExternalStore(subscribe, () => readNotes(slug), () => EMPTY);
+  const saved = useSyncExternalStore(subscribe, () => readNotes(slug), () => EMPTY);
+  const notes = [...saved, ...SAMPLES];
   const [name, setName] = useState("");
   const [text, setText] = useState("");
 
@@ -88,9 +111,27 @@ export function ArticleComments({ slug }: { slug: string }) {
       <ul>
         {notes.map((note) => (
           <li key={note.id}>
-            <b>{note.name}</b>
-            <time dateTime={note.at}>{formatWhen(note.at)}</time>
+            <div className="read-comment-top">
+              <span className="read-comment-avatar" aria-hidden="true">
+                {note.name.slice(0, 1)}
+              </span>
+              <b>{note.name}</b>
+              <time dateTime={note.at}>
+                <CalendarDays size={13} strokeWidth={1.75} aria-hidden="true" />
+                {formatWhen(note.at)}
+              </time>
+            </div>
             <p>{note.text}</p>
+            <div className="read-comment-tools">
+              <span>
+                <ThumbsUp size={14} strokeWidth={1.75} aria-hidden="true" />
+                پسند
+              </span>
+              <span>
+                <MessageCircle size={14} strokeWidth={1.75} aria-hidden="true" />
+                پاسخ
+              </span>
+            </div>
           </li>
         ))}
       </ul>

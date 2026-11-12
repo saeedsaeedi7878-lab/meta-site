@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArticleAside } from "@/components/article-aside";
 import { ArticleBody } from "@/components/article-body";
 import { ArticleComments } from "@/components/article-comments";
 import { BlogShare } from "@/components/blog-share";
@@ -8,7 +8,6 @@ import { ReadingProgress } from "@/components/reading-progress";
 import { RelatedRail } from "@/components/related-rail";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { articles } from "@/config/articles";
-import { aboutPage } from "@/config/about";
 import { assets } from "@/config/assets";
 import { site } from "@/config/site";
 import { coverTone, getArticle, getOtherArticles, readingMinutes } from "@/lib/articles";
@@ -46,7 +45,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const minutes = readingMinutes(article);
   const tone = coverTone(article.slug);
   const plate = assets.studyPlates[tone] ?? assets.studyPlates[0];
-  const publisherLine = `${aboutPage.lede.split(".")[0]}.`;
   const others = getOtherArticles(article.slug).map((item) => ({
     slug: item.slug,
     title: item.title,
@@ -111,18 +109,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 ) : null}
               </div>
               <BlogShare title={article.title} />
+              <div className="read-author-card read-author-inline">
+                <img src={assets.logo} alt="" />
+                <strong>{site.name}</strong>
+              </div>
               <div className="read-prose">
                 <ArticleBody article={article} />
               </div>
-              <section className="read-author" aria-label="ناشر">
-                <img src={assets.logo} alt="" width={44} height={44} />
-                <div>
-                  <p>ناشر</p>
-                  <strong>{site.name}</strong>
-                  <span>{publisherLine}</span>
-                  <Link href="/about">درباره متاتست</Link>
-                </div>
-              </section>
               <ArticleComments slug={article.slug} />
               <section className="read-rail" aria-label="نوشته‌های مرتبط">
                 <h2>نوشته‌های مرتبط</h2>
@@ -130,27 +123,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               </section>
             </div>
 
-            <aside className="read-side">
-              <p className="read-side-label">نوشته‌های دیگر</p>
-              <ul>
-                {others.map((item) => (
-                  <li key={item.slug}>
-                    <Link href={`/blog/${item.slug}`}>
-                      <img src={item.cover ?? assets.studyPlates[coverTone(item.slug)] ?? plate} alt="" />
-                      <span>
-                        <small>{item.category}</small>
-                        <strong>{item.title}</strong>
-                        <em>
-                          {formatFaDate(item.publishedAt)}
-                          <i />
-                          {item.readingMinutes.toLocaleString("fa-IR")} دقیقه
-                        </em>
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </aside>
+            <ArticleAside articles={others} />
           </div>
         </div>
       </article>

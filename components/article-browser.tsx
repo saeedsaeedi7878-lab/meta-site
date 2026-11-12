@@ -205,10 +205,10 @@ export function ArticleBrowser({
       <div className="library-side">
         <aside className="library-aside" aria-label="جستجو و فیلترها">
           <div className="library-brand">
+            <h1 className="shine-title">وبلاگ</h1>
             <div className="library-icon-wrap">
               <lord-icon src={assets.bookIcon} colors="primary:#F8F7FF,secondary:#8b5cf6" trigger="in" state="in-reveal" />
             </div>
-            <h1 className="shine-title">وبلاگ</h1>
           </div>
           <SearchField value={query} onChange={onQuery} placeholder="جستجو در عنوان و موضوع…" label="جستجو در نوشته‌ها" />
           {chips}

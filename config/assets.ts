@@ -32,6 +32,10 @@ export const assets = {
   },
   /** Clean outline book. Same white and purple slots. Plays the in-reveal state once. */
   bookIcon: "/icons/book.json",
+  /** Ribbon badge for the paid sample tariffs. Plays in-reveal once. */
+  ribbonBadge: "/icons/badge-ribbon.json",
+  /** Checked badge for the free sample tariff. Plays in-reveal once. */
+  freeBadge: "/icons/badge-free.json",
   /** Decorative study plates used only when an article has no cover photograph. */
   studyPlates: ["/blog/desk-pencils.jpg", "/blog/desk-orb.jpg", "/blog/desk-chart.jpg", "/blog/desk-lamp.jpg"],
 } as const;
