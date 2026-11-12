@@ -206,7 +206,7 @@ export function ArticleBrowser({
         <div className="library-intro">
           <h1 className="shine-title">وبلاگ</h1>
           <div className="library-icon-wrap">
-            <img src={assets.bookIcon} alt="" width={96} height={96} />
+            <lord-icon src={assets.bookIcon} colors="primary:#F8F7FF,secondary:#8b5cf6" trigger="in" state="in-reveal" />
           </div>
         </div>
         <aside className="library-aside" aria-label="جستجو و فیلترها">

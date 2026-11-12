@@ -30,8 +30,8 @@ export const assets = {
     growth: `${hosted}/doodle-motif-316-growth-in-reveal.json`,
     cloudUser: `${hosted}/doodle-motif-709-cloud-user-in-reveal.json`,
   },
-  /** Motif book, recolored to the same white and purple as the home Lordicons. */
-  bookIcon: "/icons/book.svg",
+  /** Doodle book, same white and purple slots as the home Lordicons. Plays the in-reveal state once. */
+  bookIcon: "/icons/book.json",
   /** Decorative study plates used only when an article has no cover photograph. */
   studyPlates: ["/blog/desk-pencils.jpg", "/blog/desk-orb.jpg", "/blog/desk-chart.jpg", "/blog/desk-lamp.jpg"],
 } as const;
