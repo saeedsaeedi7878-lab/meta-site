@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Calendar, ChevronRight, Clock, List } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ArticleBody } from "@/components/article-body";
-import { ArticleCover } from "@/components/article-cover";
-import { ArticleTile } from "@/components/article-tile";
 import { BlogShare } from "@/components/blog-share";
+import { PostCover } from "@/components/post-cover";
 import { ReadingProgress } from "@/components/reading-progress";
+import { DesktopToc, MobileToc } from "@/components/reading-toc";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { articles } from "@/config/articles";
-import { articleHeadings, getArticle, getRelatedArticles, readingMinutes } from "@/lib/articles";
+import { articleHeadings, coverTone, getArticle, getRelatedArticles, readingMinutes } from "@/lib/articles";
 import { formatFaDate } from "@/lib/format";
 import { pageMetadata } from "@/lib/seo";
 import { articleJsonLd } from "@/lib/structured-data";
@@ -41,14 +41,23 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   if (!article) notFound();
 
   const headings = articleHeadings(article);
-  const related = getRelatedArticles(article.slug);
+  const related = getRelatedArticles(article.slug, 1);
+  const next = related[0];
   const minutes = readingMinutes(article);
+  const tone = coverTone(article.slug);
 
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd(article)) }} />
       <ReadingProgress />
-      <article className="journal-read">
+      <article className="read">
+        <div className="read-tools">
+          <Link className="read-pill" href="/blog">
+            <ChevronRight size={13} strokeWidth={1.75} aria-hidden="true" />
+            وبلاگ
+          </Link>
+          <BlogShare title={article.title} />
+        </div>
         <Breadcrumbs
           items={[
             { name: "خانه", path: "/" },
@@ -56,81 +65,63 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             { name: article.title, path: `/blog/${article.slug}` },
           ]}
         />
-        <div className="journal-read-layout">
-          {headings.length > 1 ? (
-            <nav className="journal-toc" aria-label="فهرست مطالب">
-              <p>
-                <List size={15} strokeWidth={1.75} aria-hidden="true" />
-                فهرست مطالب
-              </p>
-              <ol>
-                {headings.map((heading, index) => (
-                  <li key={heading.id}>
-                    <a href={`#${heading.id}`}>
-                      <span>{(index + 1).toLocaleString("fa-IR")}</span>
-                      {heading.text}
-                    </a>
-                  </li>
-                ))}
-              </ol>
-            </nav>
-          ) : null}
-          <header className="journal-read-head">
-            <div>
-              <p className="journal-badge">{article.category}</p>
-              <h1>{article.title}</h1>
-              <p className="journal-lede">{article.description}</p>
-              <div className="journal-read-tools">
-                <p className="journal-meta">
-                  <span>
-                    <Calendar size={13} strokeWidth={1.75} aria-hidden="true" />
-                    <time dateTime={article.publishedAt}>{formatFaDate(article.publishedAt)}</time>
-                  </span>
-                  {article.updatedAt !== article.publishedAt ? (
-                    <time dateTime={article.updatedAt}>به‌روزرسانی {formatFaDate(article.updatedAt)}</time>
-                  ) : null}
-                  <span>
-                    <Clock size={13} strokeWidth={1.75} aria-hidden="true" />
-                    {minutes.toLocaleString("fa-IR")} دقیقه مطالعه
-                  </span>
-                </p>
-                <BlogShare title={article.title} />
-              </div>
-            </div>
-            <ArticleCover category={article.category} title={article.title} cover={article.cover} variant="feature" />
-          </header>
-          <div className="journal-body">
-            <ArticleBody article={article} />
-            <p className="journal-back">
-              <Link href="/blog">
-                <ChevronRight size={15} strokeWidth={1.75} aria-hidden="true" />
-                بازگشت به وبلاگ
-              </Link>
-            </p>
-          </div>
+        <div className="read-head">
+          <p className="read-kicker">
+            <i />
+            {article.category}
+          </p>
+          <h1>{article.title}</h1>
+          <p className="read-dek">{article.description}</p>
+          <p className="read-byline">
+            <time dateTime={article.publishedAt}>{formatFaDate(article.publishedAt)}</time>
+            <i />
+            <span>{minutes.toLocaleString("fa-IR")} دقیقه مطالعه</span>
+            {article.updatedAt !== article.publishedAt ? (
+              <>
+                <i />
+                <time dateTime={article.updatedAt}>به‌روزرسانی {formatFaDate(article.updatedAt)}</time>
+              </>
+            ) : null}
+          </p>
         </div>
-      </article>
-      {related.length > 0 ? (
-        <section className="journal-related" aria-labelledby="related-title">
-          <h2 id="related-title">مطالب مرتبط</h2>
-          <div className="journal-grid">
-            {related.map((item) => (
-              <ArticleTile
-                key={item.slug}
-                article={{
-                  slug: item.slug,
-                  title: item.title,
-                  description: item.description,
-                  category: item.category,
-                  publishedAt: item.publishedAt,
-                  readingMinutes: readingMinutes(item),
-                  cover: item.cover,
-                }}
-              />
-            ))}
+        <PostCover src={article.cover} title={article.title} tone={tone} />
+        <div className="read-layout">
+          <div className="read-column">
+            <MobileToc headings={headings} />
+            <div className="read-prose">
+              <ArticleBody article={article} />
+              <p className="read-end" aria-hidden="true">
+                <span />
+              </p>
+            </div>
           </div>
-        </section>
-      ) : null}
+          <DesktopToc headings={headings} minutes={minutes} />
+        </div>
+        {next ? (
+          <Link className="read-next" href={`/blog/${next.slug}`}>
+            <PostCover src={next.cover} title="" tone={coverTone(next.slug)} variant="thumb" />
+            <span>
+              <small>
+                <i />
+                نوشته‌ی بعدی
+              </small>
+              <strong>{next.title}</strong>
+              <em>
+                {formatFaDate(next.publishedAt)}
+                <i />
+                {readingMinutes(next).toLocaleString("fa-IR")} دقیقه
+              </em>
+            </span>
+            <ChevronLeft className="read-next-arrow" size={14} strokeWidth={1.75} aria-hidden="true" />
+          </Link>
+        ) : null}
+        <p className="read-tail">
+          <Link href="/blog">
+            <ChevronRight size={13} strokeWidth={1.75} aria-hidden="true" />
+            بازگشت به وبلاگ
+          </Link>
+        </p>
+      </article>
     </>
   );
 }

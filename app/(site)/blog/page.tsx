@@ -1,6 +1,4 @@
-import { Suspense } from "react";
 import { ArticleBrowser, type ArticleCard } from "@/components/article-browser";
-import { ArticleSkeleton } from "@/components/article-skeleton";
 import { getArticles, getCategories, readingMinutes } from "@/lib/articles";
 import { pageMetadata } from "@/lib/seo";
 
@@ -10,7 +8,15 @@ export const metadata = pageMetadata({
   path: "/blog",
 });
 
-export default function BlogPage() {
+type BlogSearch = {
+  q?: string;
+  cat?: string;
+  sort?: string;
+};
+
+export default async function BlogPage({ searchParams }: { searchParams: Promise<BlogSearch> }) {
+  const params = await searchParams;
+  const categories = getCategories();
   const cards: ArticleCard[] = getArticles().map((article) => ({
     slug: article.slug,
     title: article.title,
@@ -18,21 +24,11 @@ export default function BlogPage() {
     category: article.category,
     publishedAt: article.publishedAt,
     readingMinutes: readingMinutes(article),
-    featured: Boolean(article.featured),
     tags: article.tags ?? [],
     cover: article.cover,
   }));
+  const category = params.cat && categories.includes(params.cat) ? params.cat : "همه";
+  const sort = params.sort === "old" || params.sort === "short" ? params.sort : "new";
 
-  return (
-    <Suspense
-      fallback={
-        <div className="journal">
-          <ArticleSkeleton variant="feature" />
-          <ArticleSkeleton count={3} />
-        </div>
-      }
-    >
-      <ArticleBrowser articles={cards} categories={getCategories()} />
-    </Suspense>
-  );
+  return <ArticleBrowser articles={cards} categories={categories} initialQuery={params.q ?? ""} initialCategory={category} initialSort={sort} />;
 }

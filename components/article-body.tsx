@@ -1,3 +1,4 @@
+import { Info } from "lucide-react";
 import type { Article } from "@/config/articles";
 import { articleHeadings } from "@/lib/articles";
 
@@ -8,20 +9,33 @@ function blockId(article: Article, index: number) {
 }
 
 export function ArticleBody({ article }: { article: Article }) {
+  const firstParagraph = article.blocks.findIndex((block) => block.type === "paragraph");
+  const headingNumber = new Map(
+    article.blocks.flatMap((block, index) => (block.type === "heading" ? [index] : [])).map((index, order) => [index, order + 1]),
+  );
+
   return (
     <div className="prose">
       {article.blocks.map((block, index) => {
-        if (block.type === "paragraph") return <p key={index}>{block.text}</p>;
+        if (block.type === "paragraph") {
+          return (
+            <p key={index} className={index === firstParagraph ? "lead" : undefined}>
+              {block.text}
+            </p>
+          );
+        }
         if (block.type === "note") {
           return (
             <aside key={index} className="prose-note">
-              {block.text}
+              <Info size={14} strokeWidth={1.75} aria-hidden="true" />
+              <p>{block.text}</p>
             </aside>
           );
         }
         if (block.type === "heading") {
           return (
             <h2 key={index} id={blockId(article, index)}>
+              <span className="read-sec">{(headingNumber.get(index) ?? 0).toLocaleString("fa-IR", { minimumIntegerDigits: 2 })}</span>
               {block.text}
             </h2>
           );

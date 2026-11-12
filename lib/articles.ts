@@ -12,6 +12,10 @@ export function getCategories() {
   return [...new Set(articles.map((article) => article.category))];
 }
 
+export function coverTone(slug: string) {
+  return [...slug].reduce((sum, char) => sum + char.charCodeAt(0), 0) % 4;
+}
+
 export function getFeaturedArticle() {
   return articles.find((article) => article.featured) ?? getArticles()[0];
 }
