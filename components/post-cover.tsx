@@ -23,12 +23,18 @@ export function PostCover({
             src={src}
             alt={variant === "hero" ? title : ""}
             className={ready ? "is-ready" : undefined}
-            onLoad={() => setReady(true)}
+            ref={(node) => {
+              if (node?.complete && node.naturalWidth > 0) node.classList.add("is-ready");
+            }}
+            onLoad={(event) => {
+              event.currentTarget.classList.add("is-ready");
+              setReady(true);
+            }}
           />
         ) : (
           <div className={`read-fill is-${tone}`} />
         )}
-        {src && !ready ? <span className="read-bone" aria-hidden="true" /> : null}
+        {src ? <span className="read-bone" aria-hidden="true" /> : null}
       </figure>
     </div>
   );

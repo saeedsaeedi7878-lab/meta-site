@@ -31,9 +31,6 @@ export function LatestArticles() {
           <h2 id="latest-title" className="shine-title">
             تازه‌های بلاگ
           </h2>
-          <Link className="btn-line" href="/blog">
-            همه مطالب
-          </Link>
         </div>
         {articles.length === 0 ? (
           <p className="journal-empty">هنوز مطلبی منتشر نشده است.</p>
@@ -71,31 +68,35 @@ export function LatestArticles() {
                 <SwiperSlide key={article.slug}>
                   <motion.div
                     className="deck-motion"
-                    initial={reduce ? false : { opacity: 0, y: 28, scale: 0.96 }}
-                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                    initial={reduce ? false : { opacity: 0, y: 18 }}
+                    whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.45 }}
                     transition={
                       reduce
                         ? { duration: 0 }
                         : { type: "spring", stiffness: 340, damping: 28, mass: 0.72, delay: Math.min(index, 5) * 0.05 }
                     }
-                    whileHover={reduce ? undefined : { y: -6, transition: { type: "spring", stiffness: 420, damping: 28 } }}
                   >
                     <PostCard article={article} titleAs="h3" />
                   </motion.div>
                 </SwiperSlide>
               ))}
             </Swiper>
-            {articles.length > 1 ? (
-              <div className="deck-controls">
+            <div className="deck-controls">
+              {articles.length > 1 ? (
                 <button type="button" className="btn-line deck-arrow" aria-label="مطلب قبلی" onClick={() => deck.current?.slidePrev()}>
                   <ChevronRight size={16} strokeWidth={1.75} aria-hidden="true" />
                 </button>
+              ) : null}
+              <Link className="btn-line" href="/blog">
+                همه مطالب
+              </Link>
+              {articles.length > 1 ? (
                 <button type="button" className="btn-line deck-arrow" aria-label="مطلب بعدی" onClick={() => deck.current?.slideNext()}>
                   <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" />
                 </button>
-              </div>
-            ) : null}
+              ) : null}
+            </div>
           </>
         )}
       </div>

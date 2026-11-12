@@ -20,6 +20,10 @@ export function getFeaturedArticle() {
   return articles.find((article) => article.featured) ?? getArticles()[0];
 }
 
+export function getOtherArticles(slug: string) {
+  return getArticles().filter((article) => article.slug !== slug);
+}
+
 export function getRelatedArticles(slug: string, limit = 2) {
   const current = getArticle(slug);
   if (!current) return [];

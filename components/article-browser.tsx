@@ -203,13 +203,13 @@ export function ArticleBrowser({
   return (
     <div className="library">
       <div className="library-side">
-        <div className="library-intro">
-          <h1 className="shine-title">وبلاگ</h1>
-          <div className="library-icon-wrap">
-            <lord-icon src={assets.bookIcon} colors="primary:#F8F7FF,secondary:#8b5cf6" trigger="in" state="in-reveal" />
-          </div>
-        </div>
         <aside className="library-aside" aria-label="جستجو و فیلترها">
+          <div className="library-brand">
+            <div className="library-icon-wrap">
+              <lord-icon src={assets.bookIcon} colors="primary:#F8F7FF,secondary:#8b5cf6" trigger="in" state="in-reveal" />
+            </div>
+            <h1 className="shine-title">وبلاگ</h1>
+          </div>
           <SearchField value={query} onChange={onQuery} placeholder="جستجو در عنوان و موضوع…" label="جستجو در نوشته‌ها" />
           {chips}
           {filters}
