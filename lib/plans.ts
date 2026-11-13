@@ -4,6 +4,10 @@ export type Tariff = {
   price: string;
   comparePrice: string | null;
   days: string;
+  unlimited: boolean;
+  coins: string | null;
+  savings: string | null;
+  savingsVersus: string | null;
   features: string[];
   color: string;
   popular: boolean;
@@ -60,13 +64,9 @@ function toTariff(value: unknown): Tariff | null {
       if (label) features.push(label);
     }
   }
-  if (unlimited) features.push("دسترسی نامحدود");
-  else if (typeof plan.days === "number") features.push(`${fa(plan.days)} روز دسترسی`);
-  if (typeof plan.dailyCoins === "number") features.push(`${fa(plan.dailyCoins)} سکه روزانه`);
   const savings = plan.savings;
-  if (savings && typeof savings.amount === "number" && typeof savings.versusName === "string" && savings.versusName.trim()) {
-    features.push(`صرفه‌جویی ${fa(savings.amount)} تومان نسبت به ${savings.versusName.trim()}`);
-  }
+  const hasSavings =
+    !!savings && typeof savings.amount === "number" && typeof savings.versusName === "string" && savings.versusName.trim().length > 0;
 
   return {
     id: plan.id,
@@ -74,6 +74,10 @@ function toTariff(value: unknown): Tariff | null {
     price: fa(plan.price),
     comparePrice: typeof plan.comparePrice === "number" ? fa(plan.comparePrice) : null,
     days: unlimited ? "نامحدود" : typeof plan.days === "number" ? `${fa(plan.days)} روز` : "",
+    unlimited,
+    coins: typeof plan.dailyCoins === "number" ? `روزانه ${fa(plan.dailyCoins)} سکه` : null,
+    savings: hasSavings && savings && typeof savings.amount === "number" ? `صرفه‌جویی ${fa(savings.amount)} تومان` : null,
+    savingsVersus: hasSavings && savings && typeof savings.versusName === "string" ? savings.versusName.trim() : null,
     features,
     color: hex(plan.iconColors?.primary, "#c4b5fd"),
     popular: plan.popular === true,

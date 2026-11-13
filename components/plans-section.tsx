@@ -1,109 +1,184 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { CalendarDays, Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { ArrowLeft, CalendarDays, ChevronLeft, ChevronRight, Coins, Flame, Infinity as InfinityIcon, Sparkles, Tag } from "lucide-react";
 import { assets } from "@/config/assets";
+import { site } from "@/config/site";
 import type { Tariff } from "@/lib/plans";
+
+const GAP = 16;
+
+function perView(width: number) {
+  if (width > 0 && width < 680) return 1;
+  if (width > 0 && width < 980) return 2;
+  return 4;
+}
 
 export function PlansSection({ tariffs }: { tariffs: Tariff[] }) {
   const reduce = useReducedMotion();
-  const [index, setIndex] = useState(0);
-  const [play, setPlay] = useState(0);
-  const plan = tariffs[index] ?? null;
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(0);
+  const [focus, setFocus] = useState(() => Math.max(0, tariffs.findIndex((item) => item.popular)));
+  const [plays, setPlays] = useState<Record<string, number>>({});
+  const per = perView(width);
+  const card = width > 0 ? (width - GAP * (per - 1)) / per : 0;
+  const page = Math.floor(focus / Math.max(per, 1));
+  const offset = card > 0 ? page * per * (card + GAP) : 0;
 
   useEffect(() => {
-    if (reduce || tariffs.length < 2) return;
-    const timer = window.setInterval(() => {
-      setIndex((current) => (current + 1) % tariffs.length);
-      setPlay((value) => value + 1);
-    }, 5200);
-    return () => window.clearInterval(timer);
-  }, [reduce, index, tariffs.length]);
+    const node = viewportRef.current;
+    if (!node) return;
+    const observer = new ResizeObserver((entries) => {
+      setWidth(Math.round(entries[0]?.contentRect.width ?? 0));
+    });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
 
-  function show(next: number) {
+  function show(index: number) {
     const count = tariffs.length;
     if (!count) return;
-    setIndex(((next % count) + count) % count);
-    setPlay((value) => value + 1);
+    const next = ((index % count) + count) % count;
+    const plan = tariffs[next];
+    setFocus(next);
+    if (!plan) return;
+    setPlays((current) => ({ ...current, [plan.id]: (current[plan.id] ?? 0) + 1 }));
   }
 
   return (
-    <section className="tariff" aria-labelledby="plans-title">
-      <h2 id="plans-title" className="shine-title tariff-title">
-        تعرفه
-      </h2>
-      {plan ? (
+    <section className="plans" aria-labelledby="plans-title">
+      <div className="plans-head">
+        <p className="plans-kicker">
+          <Sparkles size={14} strokeWidth={1.75} aria-hidden="true" />
+          پلن‌های اشتراک
+        </p>
+        <h2 id="plans-title">
+          انتخاب <em>پلن دلخواه</em> شما
+        </h2>
+        <p>با اشتراک‌های متنوع متاتست، تجربه‌ای بهتر و کامل‌تر داشته باشید.</p>
+      </div>
+      {tariffs.length === 0 ? (
+        <p className="plans-note">تعرفه‌ها الان در دسترس نیست.</p>
+      ) : (
         <>
-          <div className="tariff-stage">
-            <AnimatePresence mode="wait">
-              <motion.article
-                key={plan.id}
-                className="tariff-card"
-                style={{ "--tone": plan.color } as CSSProperties}
-                initial={reduce ? false : { opacity: 0, x: 28 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={reduce ? undefined : { opacity: 0, x: -28 }}
-                transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 280, damping: 30, mass: 0.75 }}
+          <div className="plans-row">
+            <button type="button" className="plans-arrow" aria-label="پلن قبلی" onClick={() => show(focus - 1)}>
+              <ChevronRight size={18} strokeWidth={1.75} aria-hidden="true" />
+            </button>
+            <div className="plans-viewport" ref={viewportRef}>
+              <motion.div
+                className="plans-track"
+                animate={{ x: reduce ? 0 : offset }}
+                transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 260, damping: 32, mass: 0.8 }}
               >
-                <div className="tariff-copy">
-                  <div className="tariff-marks">
-                    {plan.popular ? <span className="tariff-popular">محبوب</span> : null}
-                    {plan.purchasable ? null : <span className="tariff-closed">فعلاً قابل خرید نیست</span>}
-                  </div>
-                  <h3>{plan.name}</h3>
-                  <p className="tariff-price">
-                    {plan.comparePrice ? <s>{plan.comparePrice}</s> : null}
-                    <b>{plan.price}</b>
-                    <span>تومان</span>
-                    {plan.days ? (
-                      <>
-                        <i />
-                        <CalendarDays size={15} strokeWidth={1.75} aria-hidden="true" />
-                        <span>{plan.days}</span>
-                      </>
-                    ) : null}
-                  </p>
-                  <ul>
-                    {plan.features.map((feature) => (
-                      <li key={feature}>
-                        <Check size={16} strokeWidth={2.25} aria-hidden="true" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="tariff-icon" aria-hidden="true">
-                  <lord-icon
-                    key={`${plan.id}-${play}`}
-                    src={plan.free ? assets.freeBadge : assets.ribbonBadge}
-                    colors={`primary:#F8F7FF,secondary:${plan.color}`}
-                    trigger="in"
-                    state="in-reveal"
+                {tariffs.map((plan, index) => (
+                  <PlanCard
+                    key={plan.id}
+                    plan={plan}
+                    index={index}
+                    active={index === focus}
+                    play={plays[plan.id] ?? 0}
+                    reduce={!!reduce}
                   />
-                </div>
-              </motion.article>
-            </AnimatePresence>
-          </div>
-          <div className="tariff-nav">
-            <button type="button" className="btn-line tariff-arrow" aria-label="پلن قبلی" onClick={() => show(index - 1)}>
-              <ChevronRight size={16} strokeWidth={1.75} aria-hidden="true" />
-            </button>
-            <div className="tariff-picks">
-              {tariffs.map((item, itemIndex) => (
-                <button key={item.id} type="button" aria-current={itemIndex === index} onClick={() => show(itemIndex)}>
-                  {item.name.replace(/^اشتراک\s+/, "")}
-                </button>
-              ))}
+                ))}
+              </motion.div>
             </div>
-            <button type="button" className="btn-line tariff-arrow" aria-label="پلن بعدی" onClick={() => show(index + 1)}>
-              <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" />
+            <button type="button" className="plans-arrow" aria-label="پلن بعدی" onClick={() => show(focus + 1)}>
+              <ChevronLeft size={18} strokeWidth={1.75} aria-hidden="true" />
             </button>
+          </div>
+          <div className="plans-dots">
+            {tariffs.map((plan, index) => (
+              <button key={plan.id} type="button" aria-label={plan.name} aria-current={index === focus} onClick={() => show(index)} />
+            ))}
           </div>
         </>
-      ) : (
-        <p className="tariff-note">تعرفه‌ها الان در دسترس نیست.</p>
       )}
     </section>
+  );
+}
+
+function PlanCard({
+  plan,
+  index,
+  active,
+  play,
+  reduce,
+}: {
+  plan: Tariff;
+  index: number;
+  active: boolean;
+  play: number;
+  reduce: boolean;
+}) {
+  return (
+    <motion.article
+      className={plan.popular ? "plan-card is-popular" : "plan-card"}
+      style={{ "--tone": plan.color } as CSSProperties}
+      initial={reduce ? false : { opacity: 0, y: 26 }}
+      whileInView={{ opacity: 1, y: active || plan.popular ? -8 : 0 }}
+      viewport={{ once: true, amount: 0.4 }}
+      whileHover={reduce ? undefined : { y: -14 }}
+      transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 280, damping: 26, delay: index * 0.05 }}
+    >
+      {plan.popular ? (
+        <span className="plan-hot">
+          <Flame size={13} strokeWidth={1.75} aria-hidden="true" />
+          محبوب‌ترین
+        </span>
+      ) : null}
+      <div className="plan-medal" aria-hidden="true">
+        <lord-icon
+          key={`${plan.id}-${play}`}
+          src={plan.free ? assets.freeBadge : assets.ribbonBadge}
+          colors={`primary:#F8F7FF,secondary:${plan.color}`}
+          trigger="in"
+          state="in-reveal"
+        />
+      </div>
+      <h3>{plan.name}</h3>
+      <p className="plan-price">
+        {plan.comparePrice ? <s>{plan.comparePrice}</s> : null}
+        <b>{plan.price}</b>
+        <span>تومان</span>
+      </p>
+      <p className="plan-meta">
+        <span>
+          {plan.unlimited ? <InfinityIcon size={14} strokeWidth={1.75} aria-hidden="true" /> : <CalendarDays size={14} strokeWidth={1.75} aria-hidden="true" />}
+          {plan.unlimited ? "دسترسی نامحدود" : plan.days}
+        </span>
+        {plan.coins ? (
+          <>
+            <i />
+            <span>
+              <Coins size={14} strokeWidth={1.75} aria-hidden="true" />
+              {plan.coins}
+            </span>
+          </>
+        ) : null}
+      </p>
+      {plan.savings ? (
+        <p className="plan-save" title={plan.savingsVersus ? `نسبت به ${plan.savingsVersus}` : undefined}>
+          <Tag size={13} strokeWidth={1.75} aria-hidden="true" />
+          {plan.savings}
+        </p>
+      ) : null}
+      {plan.features.map((feature) => (
+        <p key={feature} className="plan-note">
+          {feature}
+        </p>
+      ))}
+      {plan.purchasable ? (
+        <a className="plan-cta" href={site.appUrl}>
+          <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" />
+          انتخاب پلن
+        </a>
+      ) : (
+        <button type="button" className="plan-cta" disabled>
+          فعلاً بسته است
+        </button>
+      )}
+    </motion.article>
   );
 }
